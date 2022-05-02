@@ -74,7 +74,7 @@ func main() {
 	}
 
 	if version {
-		fmt.Printf("✅ GitHub Release Downloader v%s\n", getVersion())
+		fmt.Printf("GitHub Release Downloader v%s\n", getVersion())
 		os.Exit(0)
 	}
 
