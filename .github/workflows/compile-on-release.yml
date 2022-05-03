@@ -30,10 +30,5 @@ jobs:
       if: startswith(github.ref, 'refs/tags/')
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
-        files: |
-          bin/ghrd-386.exe
-          bin/ghrd-amd64.exe
-          bin/ghrd-386-linux
-          bin/ghrd-amd64-linux
-          bin/ghrd-amd64-darwin
+        files: bin/*
         
