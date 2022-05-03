@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -8,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"strings"
 
 	. "github.com/blad3mak3r/ghrd/structs"
 )
@@ -20,12 +22,13 @@ var (
 
 	help    bool
 	version bool
+	prompt  bool
 )
 
 const (
 	major = 0
-	minor = 1
-	path  = 1
+	minor = 2
+	path  = 0
 
 	apiUrl               = "https://api.github.com"
 	acceptHeader         = "application/vnd.github.v3+json"
@@ -56,10 +59,24 @@ func error(str string) {
 	os.Exit(1)
 }
 
+func Prompt(label string) string {
+	var s string
+	r := bufio.NewReader(os.Stdin)
+	for {
+		fmt.Fprintf(os.Stderr, label+" ")
+		s, _ = r.ReadString('\n')
+		if s != "" {
+			break
+		}
+	}
+	return strings.TrimSpace(s)
+}
+
 func main() {
 
 	flag.BoolVar(&help, "help", false, "Show this help menu")
 	flag.BoolVar(&version, "version", false, "Print GHRD version.")
+	flag.BoolVar(&prompt, "prompt", false, "If you want to intruduce values manually.")
 
 	flag.StringVar(&owner, "owner", "", "The GitHub repository owner.")
 	flag.StringVar(&repo, "repo", "", "The GitHub repository name.")
@@ -73,10 +90,25 @@ func main() {
 		os.Exit(0)
 	}
 
-	fmt.Printf("Welcome to GitHub Release Downloader v%s\n", getVersion())
+	fmt.Printf("Welcome to GitHub Release Downloader v%s\n\n", getVersion())
 
 	if version {
 		os.Exit(0)
+	}
+
+	if prompt {
+		if len(owner) < 1 {
+			owner = Prompt("Enter the GitHub owner:")
+		}
+		if len(repo) < 1 {
+			repo = Prompt("Enter the GitHub repository:")
+		}
+		if len(token) < 1 {
+			token = Prompt("Enter the GitHub token:")
+		}
+		if len(artifact) < 1 {
+			artifact = Prompt("Enter the artifact name to download:")
+		}
 	}
 
 	if len(owner) < 1 {
@@ -94,8 +126,6 @@ func main() {
 	if len(artifact) < 1 {
 		error("⚠️ Flag '--artifact' is not present, use --help for more info.")
 	}
-
-	fmt.Printf("⏳ Initializing GitHub Release Downloader (GHRD) %s\n", getVersion())
 
 	httpClient := http.Client{}
 
@@ -129,6 +159,10 @@ func getLatestRealease(httpClient *http.Client) GithubRelease {
 		error(err.Error())
 	}
 	defer res.Body.Close()
+
+	if res.StatusCode != http.StatusOK {
+		error(fmt.Sprintf("Non successful status code requesting latest release for %s/%s: %s", owner, repo, res.Status))
+	}
 
 	decoder := json.NewDecoder(res.Body)
 
@@ -170,6 +204,10 @@ func downloadAsset(httpClient *http.Client, asset GithubAsset) {
 	res, err := httpClient.Do(req)
 	if err != nil {
 		error(err.Error())
+	}
+
+	if res.StatusCode != http.StatusOK {
+		error(fmt.Sprintf("Non successful status code downloading artifact %s from %s/%s: %s", artifact, owner, repo, res.Status))
 	}
 
 	defer res.Body.Close()
