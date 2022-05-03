@@ -13,27 +13,6 @@ env:
 jobs:
 
   build:
-    strategy:
-      matrix:
-        goos: [""]
-        goarch: [""]
-        name: [""]
-        include:
-          - goos: windows
-            goarch: amd64
-            name: ghrd-amd64.exe
-          - goos: windows
-            goarch: 386
-            name: ghrd-i386.exe
-          - goos: darwin
-            goarch: amd64
-            name: ghrd-amd64-darwin
-          - goos: linux
-            goarch: amd64
-            name: ghrd-amd64-linux
-          - goos: linux
-            goarch: 386
-            name: ghrd-i386-linux
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -43,14 +22,17 @@ jobs:
       with:
         go-version: 1.18
 
-    - name: Build executable ${{ matrix.name }}
-      env:
-        GOOS: ${{ matrix.goos }}
-        GOARCH: ${{ matrix.goarch }}
-      run: go build -o bin/${{ matrix.name }} main.go
+    - name: Build executables
+      run: ./compile.sh
       
     - name: Publish executables to GitHub Release
       uses: softprops/action-gh-release@v1
       if: startswith(github.ref, 'refs/tags/')
       with:
-        files: bin/ghrd-*
+        files: |
+          bin/ghrd-386.exe
+          bin/ghrd-amd64.exe
+          bin/ghrd-386-linux
+          bin/ghrd-amd64-linux
+          bin/ghrd-amd64-darwin
+        
