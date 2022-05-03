@@ -7,7 +7,7 @@ on:
 env:
   BUILD_NUMBER: ${{ github.run_number }}
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  HUGEBOT_RELEASE_TAG: ${{ github.event.release.tag_name }}
+  RELEASE_TAG: ${{ github.event.release.tag_name }}
     
 
 jobs:
