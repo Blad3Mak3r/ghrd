@@ -1,0 +1,56 @@
+name: Go
+
+on:
+  release:
+    types: [ published ]
+
+env:
+  BUILD_NUMBER: ${{ github.run_number }}
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  HUGEBOT_RELEASE_TAG: ${{ github.event.release.tag_name }}
+    
+
+jobs:
+
+  build:
+    strategy:
+      matrix:
+        goos: [""]
+        goarch: [""]
+        name: [""]
+        include:
+          - goos: windows
+            goarch: amd64
+            name: ghrd-amd64.exe
+          - goos: windows
+            goarch: 386
+            name: ghrd-i386.exe
+          - goos: darwin
+            goarch: amd64
+            name: ghrd-amd64-darwin
+          - goos: linux
+            goarch: amd64
+            name: ghrd-amd64-linux
+          - goos: linux
+            goarch: 386
+            name: ghrd-i386-linux
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Go
+      uses: actions/setup-go@v3
+      with:
+        go-version: 1.18
+
+    - name: Build executable ${{ matrix.name }}
+      env:
+        GOOS: ${{ matrix.goos }}
+        GOARCH: ${{ matrix.goarch }}
+      run: go build -o bin/${{ matrix.name }} main.go
+      
+    - name: Publish executables to GitHub Release
+      uses: softprops/action-gh-release@v1
+      if: startswith(github.ref, 'refs/tags/')
+      with:
+        files: bin/ghrd-*
