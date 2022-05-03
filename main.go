@@ -73,8 +73,9 @@ func main() {
 		os.Exit(0)
 	}
 
+	fmt.Printf("Welcome to GitHub Release Downloader v%s\n", getVersion())
+
 	if version {
-		fmt.Printf("GitHub Release Downloader v%s\n", getVersion())
 		os.Exit(0)
 	}
 
