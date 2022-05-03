@@ -1,1 +1,1 @@
-# release-downloader-go
+GitHub Release Dowloader
