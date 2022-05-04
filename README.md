@@ -1,5 +1,5 @@
 # GitHub Release Dowloader
-GHRD is a CLI that allows you to download an artifact of the latest release from a repository on GitHub.
+GHRD is a CLI that allows you to download an artifact from the latest release of a repository on GitHub.
 
 ## How to use
 Download the latest release from [here](#downloads) into your computer.
